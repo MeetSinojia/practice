@@ -1,42 +1,28 @@
 const express = require('express');
-const fs = require('fs');
 const bodyParser = require('body-parser');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-app.use(bodyParser.raw({ type: '*/*' }));
+// Parse incoming JSON requests
+app.use(bodyParser.json());
 
-app.post('/uploadCode', (req, res) => {
-  const {
-    Name,
-    Email,
-    CollegeName,
-    StudentId,
-    FileName
-  } = req.headers;
+// In-memory data store (for simplicity)
+let data = [];
 
-  if (!(Name && Email && CollegeName && StudentId && FileName)) {
-    return res.status(400).send('Missing mandatory headers');
-  }
-
-  // Validate file extension
-  const fileExtension = FileName.split('.').pop();
-  if (fileExtension !== 'py') {
-    return res.status(400).send('Invalid file extension. Please upload a Python file with .py extension.');
-  }
-
-  const filePath = `${StudentId}_${FileName}`;
-
-  fs.writeFile(filePath, req.body, (err) => {
-    if (err) {
-      return res.status(500).send('Internal Server Error');
-    }
-
-    return res.status(200).send('Code uploaded successfully');
-  });
+// POST route to add a name and email
+app.post('/users', (req, res) => {
+  const { name, email } = req.body;
+  data.push({ name, email });
+  res.send('User added successfully');
 });
 
+// GET route to retrieve all names and emails
+app.get('/users', (req, res) => {
+  res.json(data);
+});
+
+// Start the server
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
