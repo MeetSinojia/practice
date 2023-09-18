@@ -1,25 +1,37 @@
 const express = require('express');
+const multer  = require('multer');
+const fs = require('fs');
 
 const app = express();
 
-// In-memory data store (for simplicity)
-let data = [];
+// Multer configuration for handling file uploads
+const upload = multer({ dest: 'uploads/' });
 
-// POST route to add a name and email
-app.post('/users', (req, res) => {
-  const name = req.header('name');
-  const email = req.header('email');
-  data.push({ name, email });
-  res.send('User added successfully');
-});
+// Define a route to handle file uploads
+app.post('/upload_code', upload.single('codeFile'), (req, res) => {
+    const { YourName, Email, CollegeName, StudentId, FileName } = req.headers;
 
-// GET route to retrieve all names and emails
-app.get('/users', (req, res) => {
-  res.json(data);
+    // Check if the uploaded file is not a txt file
+    if (req.file && !req.file.originalname.endsWith('.txt')) {
+        const filePath = req.file.path;
+        
+        // Process the uploaded file (e.g., save it to a specific location)
+        // Example: fs.renameSync(filePath, 'desired_location/' + FileName);
+
+        // Respond with success message or any additional processing
+        res.json({ success: true });
+    } else {
+        // Delete the uploaded file (if needed)
+        if (req.file) {
+            fs.unlinkSync(req.file.path);
+        }
+
+        res.status(400).json({ error: "Please don't upload txt files" });
+    }
 });
 
 // Start the server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
 });
