@@ -1,17 +1,14 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 
 const app = express();
-
-// Parse incoming JSON requests
-app.use(bodyParser.json());
 
 // In-memory data store (for simplicity)
 let data = [];
 
 // POST route to add a name and email
 app.post('/users', (req, res) => {
-  const { name, email } = req.body;
+  const name = req.header('name');
+  const email = req.header('email');
   data.push({ name, email });
   res.send('User added successfully');
 });
